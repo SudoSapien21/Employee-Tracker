@@ -3,6 +3,16 @@ const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const PORT = process.env.PORT || 3001;
 
+// Error handling function for database errors
+function handleDatabaseError(error) {
+  console.error('Database Error:', error);
+}
+
+// Error handling function for input validation errors
+function handleInputError(error) {
+  console.error('Input Error:', error);
+}
+
 
 // Middleware
 const app = express();
@@ -123,7 +133,7 @@ FROM employee AS e
 LEFT JOIN roles AS r ON e.role_id = r.id -- Change "role" to "roles"
 LEFT JOIN department AS d ON r.department_id = d.id
 LEFT JOIN employee AS m ON e.manager_id = m.id
-  `;
+`;
 
   db.query(sql, (err, result) => {
     if (err) {
@@ -148,8 +158,8 @@ function addDepartment() {
     ])
     .then((answers) => {
       const { name } = answers;
-      const sql = "INSERT INTO department (name) VALUES (?)";
-      db.query(sql, [name], (err, result) => {
+      const sql = "INSERT INTO department (id, name) VALUES (NULL, ?)";
+      db.query(sql, [name], (err) => {
         if (err) {
           console.error("Error occurred:", err);
         } else {
@@ -187,9 +197,8 @@ function addRole() {
     ])
     .then((answers) => {
       const { title, salary, department_id } = answers;
-      const sql =
-        "INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)";
-      db.query(sql, [title, salary, department_id], (err, result) => {
+      const sql = "INSERT INTO roles (id, title, salary, department_id) VALUES (NULL, ?)";
+      db.query(sql, [title, salary, department_id], (err) => {
         if (err) {
           console.error("Error occurred:", err);
         } else {
@@ -233,7 +242,7 @@ function addEmployee() {
       const { first_name, last_name, role_id, manager_id } = answers;
       const sql =
         "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
-      db.query(sql, [first_name, last_name, role_id, manager_id], (err, result) => {
+      db.query(sql, [first_name, last_name, role_id, manager_id], (err) => {
         if (err) {
           handleDatabaseError(err);
         } else {
@@ -361,16 +370,13 @@ function addRole() {
           } else {
             console.log("Employee role updated successfully. DNACE LIKE A COW!");
           }
-          displayOptions();
+          mainMenu();
         });
       });
     });
   }
   
-  function handleInputError(error) {
-    console.error('Input Error:', error);
-  }
-  
+ 
 
   
   app.listen(PORT, () => {
